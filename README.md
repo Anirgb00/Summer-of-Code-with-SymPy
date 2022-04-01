@@ -28,9 +28,9 @@ Major additions:
 
 (Merged) sympy/sympy#22376 - Making the Laplace Transform Rule-Based 
 
-(Merged) sympy/sympy##23215 - Inconsistencies in float + int 
+(Merged) sympy/sympy#23215 - Inconsistencies in float + int 
 
-(Merged) sympy/sympy #22873 - Printing error fixed.
+(Merged) sympy/sympy#22873 - Printing error fixed.
 
 (Merged) sympy/sympy#22889  - functions : Improved floor and ceiling results 
 
