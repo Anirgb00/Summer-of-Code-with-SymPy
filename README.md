@@ -50,7 +50,7 @@ Future Work:
  
  
 My GSoC Experience and Learnings:
-I've been writing weekly blog-posts documenting my journey during GSoC. The blog is hosted at namannimmo.me/emerald. This experience was so amazing and complete and I learned lots of different things; I can't write them all in here.
+I've been writing weekly blog-posts documenting my journey during GSoC. This experience was so amazing and complete and I learned lots of different things; I can't write them all in here.
 
 But, here are a few:
 
@@ -62,7 +62,6 @@ Since a lot of people get confused in the beginning, I've written a detailed ans
 Edit: I'm mentoring for SymPy in GSoC 2021.
 
 :wq for now.
-
-Naman Gera (namannimmo)
+ 
 
 Email | GSoC blog | StackOverflow | Quora
