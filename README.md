@@ -26,13 +26,15 @@ PULL REQUESTS -
 
 Major additions:
 
-(Merged) sympy/sympy#19390 - Adds TransferFunction, Series, Parallel, and Feedback classes for control package.
-(Merged) sympy/sympy#19896 - Adds other useful methods in TransferFunction class.
-(Merged) sympy/sympy#19761 - Adds TransferFunctionMatrix class in physics.control.
+(Merged) sympy/sympy#22376 - Making the Laplace Transform Rule-Based 
+(Merged) sympy/sympy##23215 - Inconsistencies in float + int 
+(Merged) sympy/sympy #22873 - Printing error fixed.
+(Merged) sympy/sympy#22889  - functions : Improved floor and ceiling results 
+
 Miscellaneous PRs opened in the summer:
 
-(Merged) sympy/sympy-bot#87 - Adds physics.control as valid submodule.
-(Merged) sympy/sympy#20008 - Modify docs of is_stable method in TransferFunction class.
+(Merged) sympy/sympy-
+(Merged) sympy/sympy
 
 
 Future Work:
