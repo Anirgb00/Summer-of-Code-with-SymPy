@@ -2,7 +2,7 @@
 ![gsoc_logo](https://user-images.githubusercontent.com/50987933/161259326-bddd6679-50b5-40ea-9614-5799b8819102.png)
 
 
-GSoC 2020 @SymPy
+**GSoC 2020 @SymPy**
 This repository showcases my proposal, and the work done (final report) during Google Summer of Code 2020 with the SymPy project. SymPy is a computer algebra system written in pure python.
 
 It all started here:
