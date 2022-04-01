@@ -7,13 +7,12 @@ This repository showcases my proposal, and the work done (final report) during G
 
 It all started here:
 
-img3
+
 
 The SymPy community is very welcoming and supportive. I sent an email to the SymPy mailing list around Feb 3rd, 2020, asking the community about the scope of adding a new Control Systems engineering package. Initially, their opinions were against this, and students were advised to focus on improving existing SymPy packages, instead of adding new packages (core or not).
 
 I continued to show my interest in this project and guess what?? Here is the response I got finally (Thanks, Jason):
 
-img4
 
 Project: Control Theory - Implement a control systems package
 Student: Naman Gera (namannimmo10)
@@ -75,177 +74,14 @@ s  + s + 1
 >>> init_printing(use_unicode=True)
 >>> G2 = TransferFunction(s**4 - 2*s**3 + 5*s + 4, s + 4, s)
 >>> -G2 # negate a transfer function
-   4      3          
-- s  + 2⋅s  - 5⋅s - 4
-─────────────────────
-        s + 4        
->>> G2**3 # take the integer power
-                     3
-⎛ 4      3          ⎞ 
-⎝s  - 2⋅s  + 5⋅s + 4⎠ 
-──────────────────────
-              3       
-       (s + 4)        
->>> _.expand() # now expand the num and den after taking the power
- 12      11       10      9       8       7        6       5        4       3        2             
-s   - 6⋅s   + 12⋅s   + 7⋅s  - 48⋅s  + 12⋅s  + 123⋅s  - 30⋅s  - 192⋅s  + 29⋅s  + 300⋅s  + 240⋅s + 64
-───────────────────────────────────────────────────────────────────────────────────────────────────
-                                        3       2                                                  
-                                       s  + 12⋅s  + 48⋅s + 64
-You can use a Float or an Integer (or other constants) as num and den:
-
->>> G3 = TransferFunction(1/2, 3, a)
->>> G3.num
-0.500000000000000
->>> G3.den
-3
->>> G3.var
-a
-Other features used in computations:
-
->>> TransferFunction(s + 2, s**2 - 9, s).dc_gain() # compute the gain of the response as the freq approaches 0.
--2/9
->>> TransferFunction(a, s, s).dc_gain()
-∞⋅sign(a)
->>> G4 = TransferFunction((1 - s)**2, (s + 1)**2, s)
->>> G4.is_stable() # checks for the asymptotic stability
-True
->>> G4.poles()
-[-1, -1]
->>> G4.zeros()
-[1, 1]
->>> G4.is_proper
-True
->>> G4.is_biproper
-True
->>> G4.is_strictly_proper
-False
-
->>> from sympy import symbols
->>> c, p, d0, d1, d2 = symbols('c, p, d0:3')
->>> num, den = c*p, d2*p**3 + d1*p**2 - d0
->>> G5 = TransferFunction(num, den, p)
->>> G5.subs({c: 2, d0: 3, d1: 2, d2: 5})
-      2⋅p      
-───────────────
-   3      2    
-5⋅p  + 2⋅p  - 3
->>> G5.subs({c: 2, d0: 3, d1: 2, d2: 5}).evalf()
-        2.0⋅p        
-─────────────────────
-     3        2      
-5.0⋅p  + 2.0⋅p  - 3.0
->>> G5.xreplace({c: 3.0})
-       3.0⋅p       
-───────────────────
-          2       3
--d₀ + d₁⋅p  + d₂⋅p 
-
->>> from sympy import factor
->>> factor(TransferFunction(s - 1, s**2 - 2*s + 1, s))
- s - 1  
-────────
-       2
-(s - 1) 
->>> TransferFunction((p + 3)*(p - 1), (p - 1)*(p + 5), p).simplify()
-p + 3
-─────
-p + 5
-Now, let's do some SISO transfer function algebra:
-
->>> init_printing(use_unicode=False)
->>> G6 = TransferFunction(s + 1, s**2 + s + 1, s)
->>> G6
-  s + 1   
-----------
- 2        
-s  + s + 1
->>> G7 = TransferFunction(s - p, s + 3, s)
->>> G7
--p + s
-------
-s + 3 
->>> G8 = TransferFunction(4*s**2 + 2*s - 4, s - 1, s)
->>> G8
-   2          
-4*s  + 2*s - 4
---------------
-    s - 1     
->>> G9 = TransferFunction(a - s, s**2 + 4, s)
->>> G9
-a - s 
-------
- 2    
-s  + 4
-
->>> G6 + G7 # just adding two TFs will leave them unevaluated
-  s + 1      -p + s
----------- + ------
- 2           s + 3 
-s  + s + 1         
->>> # `.doit()` will evaluate the result above
->>> # `.rewrite(TransferFunction)` does the same.
->>> _.doit()
-         ⎛ 2        ⎞                  
-(-p + s)⋅⎝s  + s + 1⎠ + (s + 1)⋅(s + 3)
-───────────────────────────────────────
-                  ⎛ 2        ⎞         
-          (s + 3)⋅⎝s  + s + 1⎠
->>> G8 - G9
-   2                   
-4⋅s  + 2⋅s - 4   -a + s
-────────────── + ──────
-    s - 1         2    
-                 s  + 4
->>> G6 * G9
-⎛  s + 1   ⎞ ⎛a - s ⎞
-⎜──────────⎟⋅⎜──────⎟
-⎜ 2        ⎟ ⎜ 2    ⎟
-⎝s  + s + 1⎠ ⎝s  + 4⎠
->>> G8 * G9 + G6 - G7 # do all at the same time
-⎛   2          ⎞                              
-⎜4⋅s  + 2⋅s - 4⎟ ⎛a - s ⎞     s + 1      p - s
-⎜──────────────⎟⋅⎜──────⎟ + ────────── + ─────
-⎝    s - 1     ⎠ ⎜ 2    ⎟    2           s + 3
-                 ⎝s  + 4⎠   s  + s + 1
->>> (G8 * G9 + G6).rewrite(TransferFunction)
-        ⎛ 2        ⎞ ⎛   2          ⎞                   ⎛ 2    ⎞
-(a - s)⋅⎝s  + s + 1⎠⋅⎝4⋅s  + 2⋅s - 4⎠ + (s - 1)⋅(s + 1)⋅⎝s  + 4⎠
-────────────────────────────────────────────────────────────────
-                         ⎛ 2    ⎞ ⎛ 2        ⎞                  
-                 (s - 1)⋅⎝s  + 4⎠⋅⎝s  + s + 1⎠
-A class for representing negative feedback interconnection between input/output systems was also added - Feedback. Here's how solve a basic block diagram problem (having a negative feedback) with that class:
-
-img6
-
->>> from sympy.physics.control import Feedback
->>> G = plant = TransferFunction(2*s**2 + 5*s + 1, s**2 + 2*s + 3, s)
->>> C = controller = TransferFunction(5*(s + 2), s + 10, s)
->>> velocity = Feedback(plant, controller)
->>> velocity
-        ⎛   2          ⎞       
-        ⎜2⋅s  + 5⋅s + 1⎟       
-        ⎜──────────────⎟       
-        ⎜  2           ⎟       
-        ⎝ s  + 2⋅s + 3 ⎠       
-───────────────────────────────
-    ⎛   2          ⎞           
-1   ⎜2⋅s  + 5⋅s + 1⎟ ⎛5⋅s + 10⎞
-─ + ⎜──────────────⎟⋅⎜────────⎟
-1   ⎜  2           ⎟ ⎝ s + 10 ⎠
-    ⎝ s  + 2⋅s + 3 ⎠
->>> velocity.doit() # this gives the resultant closed-loop transfer function
-                        ⎛ 2          ⎞ ⎛   2          ⎞               
-               (s + 10)⋅⎝s  + 2⋅s + 3⎠⋅⎝2⋅s  + 5⋅s + 1⎠               
-──────────────────────────────────────────────────────────────────────
-⎛         ⎛ 2          ⎞              ⎛   2          ⎞⎞ ⎛ 2          ⎞
-⎝(s + 10)⋅⎝s  + 2⋅s + 3⎠ + (5⋅s + 10)⋅⎝2⋅s  + 5⋅s + 1⎠⎠⋅⎝s  + 2⋅s + 3⎠
->>> velocity.doit().simplify() # we can further cancel poles and zeros
-                      ⎛   2          ⎞              
-             (s + 10)⋅⎝2⋅s  + 5⋅s + 1⎠              
-────────────────────────────────────────────────────
-          ⎛   2          ⎞            ⎛ 2          ⎞
-5⋅(s + 2)⋅⎝2⋅s  + 5⋅s + 1⎠ + (s + 10)⋅⎝s  + 2⋅s + 3⎠
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 My GSoC Experience and Learnings:
 I've been writing weekly blog-posts documenting my journey during GSoC. The blog is hosted at namannimmo.me/emerald. This experience was so amazing and complete and I learned lots of different things; I can't write them all in here.
 
