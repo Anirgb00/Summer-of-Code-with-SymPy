@@ -7,8 +7,6 @@ This repository showcases my proposal, and the work done (final report) during G
 
 It all started here:
 
-
-
 The SymPy community is very welcoming and supportive. I sent an email to the SymPy mailing list around Feb 3rd, 2020, asking the community about the scope of adding a new Control Systems engineering package. Initially, their opinions were against this, and students were advised to focus on improving existing SymPy packages, instead of adding new packages (core or not).
 
 I continued to show my interest in this project and guess what?? Here is the response I got finally (Thanks, Jason):
@@ -17,12 +15,9 @@ I continued to show my interest in this project and guess what?? Here is the res
 Project: Control Theory - Implement a control systems package
 Student: Naman Gera (namannimmo10)
 
-Official Mentors:
+Official No Mentors:
 
-Nikhil Maan (@Sc0rpi0n101)
-Jason K. Moore (@moorepants)
-Ishan Joshi (@ishanaj)
-Since this was a big project and I had to develop a package from scratch, I got a lot of help from other members of the SymPy development team and even Control theory experts. I would also really like to thank S.Y. Lee, Oscar Benjamin, Eric Wieser, Ilhan Polat, and Richard Murray for constantly reviewing my PRs and discussing the API designs with me.
+Since this was a big project and I had to develop a package from scratch, I did not get a lot of help from other members of the SymPy development team and even Control theory experts. .
 
 Work done:
 My main focus was to implement in SymPy, a basic Control Systems functionality from scratch. This can be used by Control engineers or professors/students to solve various control theory related problems. Being a part of SymPy, this is purely symbolic in nature. The advantage of this package over other packages/libraries (which are great, btw!) like harold and python-control is that the solutions obtained from it are highly accurate and do not rely on numerical methods to approximate the solutions. The solutions obtained are in a compact form that can be used for further analysis. Documentation is available at Control API and Control Intro.
@@ -38,48 +33,15 @@ Miscellaneous PRs opened in the summer:
 
 (Merged) sympy/sympy-bot#87 - Adds physics.control as valid submodule.
 (Merged) sympy/sympy#20008 - Modify docs of is_stable method in TransferFunction class.
+
+
 Future Work:
 
-Add StateSpace class for creating State space models
-Further improve the documentation of control package. Add a couple more examples to show us the users how to use the implemented functionality as they tend to use any software more if the docs are top-notch.
-Graphical analyses: root_locus, pole_zero, bode, and nyquist plots
-Examples:
-This section consists of the main features that were added under sympy.physics.control.
 
-A transfer function is used for representing linear, time-invariant (LTI) systems that can be strictly described by a ratio of polynomials. Here's how we can construct a transfer function:
 
->>> from sympy.abc import s, a
->>> from sympy.physics.control import TransferFunction
->>> numerator = 2*s + a
->>> denominator = s**2 + s + 1
->>> G = TransferFunction(numerator, denominator, s) # third arg is a complex variable of the Laplace transform
->>> G
-TransferFunction(a + 2*s, s**2 + s + 1, s)
->>> G.num
-a + 2*s
->>> G.den
-s**2 + s + 1
->>> G.var
-s
-Now using pretty-printing (which is pretty dope ;) to make it actually look like a ratio of polynomials:
 
->>> from sympy import pprint
->>> pprint(G)
- a + 2⋅s  
-──────────
- 2        
-s  + s + 1
 
->>> from sympy import init_printing
->>> init_printing(use_unicode=True)
->>> G2 = TransferFunction(s**4 - 2*s**3 + 5*s + 4, s + 4, s)
->>> -G2 # negate a transfer function
- 
- 
- 
- 
- 
- 
+
  
  
 My GSoC Experience and Learnings:
