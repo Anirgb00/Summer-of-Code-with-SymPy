@@ -1,1 +1,197 @@
 
+
+
+************************************************************************************************************
+
+Inconsistencies in float + int #23215
+
+Using sympy 1.10 I get a float when adding a float and an integer except in some cases
+where the result is an integer.Shouldn't all these result in floats since they are
+all approximations?
+
+sympy.Float(1.0) + sympy.Integer(0)
+Out[1]: 
+1.00000000000000
+
+sympy.Float(0.0) + sympy.Integer(1)
+Out[2]: 
+1.00000000000000
+
+sympy.Float(0.0) + sympy.Integer(0)
+Out[3]: 
+0
+
+sympy.Float(0.0) + sympy.Float(0.0)
+Out[4]: 
+0
+
+
+A further argument below. 0.0 + 0.0 is seen as rational, but 0.0 is unknown
+to be rational.
+
+(sympy.Float(0.0) + sympy.Float(0.0)).is_rational
+Out[5]: True
+
+(sympy.Float(0.0)).is_rational
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+I managed to condense a minimal example reproducing the regression I found in my code:
+
+import sympy
+x = sympy.Symbol("x")
+sympy.Piecewise((1, sympy.Eq(x, sympy.Float(0.0))), (2, sympy.Eq(x, sympy.Float(1.0))))
+
+
+The output using sympy 1.10:
+
+Piecewise((1, Eq(x, 0)), (2, Eq(x, 1.0))) 
+
+ output in sympy 1.9:
+
+Piecewise((1, Eq(x, 0.0)), (2, Eq(x, 1.0)))
+
+
+The issue being that the Float(0.0) gets converted to an integer when putting it 
+into the Piecewise.  Simply creating sympy.Eq(x, sympy.Float(0.0)) does not change to integer.
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+This tries to canonicalise the conditions in a Piecewise:
+
+ for expr, cond in _args: 
+     cond = cond.replace( 
+         lambda _: _.is_Relational, _canonical_coeff) 
+
+It uses the _canonical_coeff function which does this:
+
+ rhs = (rel.rhs - b)/m 
+
+
+That turns a Float rhs into an Integer in this case:
+> sympy/core/relational.py(56)_canonical_coeff()
+-> if m < 0:
+(Pdb) l
+
+
+  	    if not rel.is_Relational or rel.rhs.is_Boolean:
+   	        return rel  # Eq(x, True)
+   	    b, l = rel.lhs.as_coeff_Add(rational=True)
+   	    m, lhs = l.as_coeff_Mul(rational=True)
+   	    rhs = (rel.rhs - b)/m
+   ->	    if m < 0:
+   	        return rel.reversed.func(lhs, rhs)
+   	    return rel.func(lhs, rhs)
+   	
+   	
+   	class Relational(Boolean, EvalfMixin):
+       
+(Pdb) p rel.rhs
+0.0
+(Pdb) p rel.rhs - b
+0
+(Pdb) p b
+0
+
+Before c388adb that wouldn't have mattered because here the replacement 
+would not have happened due to the new and old equations comparing equal:
+
+
+***********************************************************************************************
+
+
+In [1]: Eq(x, 0) == Eq(x, 0.0)
+Out[1]: True
+
+In [3]: Eq(x, 0.0).replace(lambda e: e.is_Relational, lambda e: Eq(x, 0))
+Out[3]: x = 0.0
+Whereas SymPy 1.10 gives:
+
+In [1]: Eq(x, 0) == Eq(x, 0.0)
+Out[1]: False
+
+In [2]: Eq(x, 0.0).replace(lambda e: e.is_Relational, lambda e: Eq(x, 0))
+Out[2]: x = 0
+I think that the change in c388adb is correct although it is surfacing another bug. The bug is that the rhs is turned into an Integer in _canonical_coeff and that in turn results from the bug you mentioned in the OP which is this:
+
+In [1]: S(0) + S(0.0)
+Out[1]: 0
+That comes from here:
+sympy/sympy/core/numbers.py
+
+Lines 1183 to 1184 in b2ff075
+
+ if zero and _mpf_ == fzero: 
+     return S.Zero  # Float(0) -> 0.0; Float._new((0,0,0,0)) -> 0 
+
+Tracing that back we get to 769b048 so it's been there a long time.
+There seems to be a basic inconsistency in the Float constructors:
+
+In [6]: Float._new((0,0,0,0), 0)
+Out[6]: 0
+
+In [7]: Float(0)
+Out[7]: 0.0
+
+
+
+
+***********************************************************************************************
+
+
+A less invasive fix for the Piecewise issue only would be:
+
+diff --git a/sympy/core/relational.py b/sympy/core/relational.py
+index b12bb59..7f0f1f6 100644
+
+a/sympy/core/relational.py
+
+   
+  def _canonical_coeff(rel):
+      return rel  # Eq(x, True)
+      b, l = rel.lhs.as_coeff_Add(rational=True)
+      m, lhs = l.as_coeff_Mul(rational=True)
+       rhs = (rel.rhs - b)/m
+       rhs = rel.rhs
+       if b:
+           rhs = rhs - b
+           if m is not S.One:
+               rhs = rhs/m
+               if m < 0:
+                   return rel.reversed.func(lhs, rhs)
+     return rel.func(lhs, rhs)
+
+
+
+I think there needs to be some consideration about whether Float._new should perform these conversions though.
+
+@ThePauliPrinciple
+Contributor
+ThePauliPrinciple commented on Mar 8 • 
+Not sure if this will lead to a helpful result, but Float(0.0) is stored in a weird way:
+
+>>> sympy.S(0.0).__getnewargs_ex__()
+(((0, '0', 0, 0),), {'precision': 53})
+>>> sympy.Float._new((0,'0',0,0), 0)
+0.0
+Note that one of the zeros is a string.
+
+Could it be that the string zero gets converted with a sympify somewhere?
+
+
+
+***********************************************************************************************
+Floats always have a tendency to jump up and bite us, don't they.
+
+To my current understanding we see floats as an approximation of an underlying exact number. 
+The error being some epsilon depending on to how many decimals the float has been evaluated.
+ So the underlying exact number of Float(0.0) could be 0, but it could also be a small rational
+number or even a small irrational number. Given this way of looking at floats a 0.0 is not the 
+same as S.Zero. But sympy.Float(0.0).is_zero gives True, which is problematic. 
+Also sympy.Float(0.0).is_positive returns False, which is not entirely sure
+ (I would give it a 50-50 probability ;-).
+
+The question is if this is the model for floats in sympy and if the full consequences
+ of this can be taken. If not how would we define a float in sympy?
+
+
+
